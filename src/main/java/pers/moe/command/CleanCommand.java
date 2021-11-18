@@ -11,7 +11,7 @@ public class CleanCommand extends JSimpleCommand {
 
     private CleanCommand() {
         super(ThrowItMirai.INSTANCE, "clean-throw");
-        this.setDescription("把别人丢出去");
+        this.setDescription("清理数据目录");
     }
 
     @Handler
