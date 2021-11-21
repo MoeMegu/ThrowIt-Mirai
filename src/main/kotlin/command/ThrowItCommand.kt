@@ -4,13 +4,12 @@ import net.coobird.thumbnailator.Thumbnails
 import net.coobird.thumbnailator.geometry.Positions
 import net.mamoe.mirai.console.command.CommandSender
 import net.mamoe.mirai.console.command.SimpleCommand
-import net.mamoe.mirai.contact.User
+import net.mamoe.mirai.contact.Contact
 import net.mamoe.mirai.utils.ExternalResource
 import net.mamoe.mirai.utils.ExternalResource.Companion.toExternalResource
 import net.mamoe.mirai.utils.ExternalResource.Companion.uploadAsImage
 import pers.moe.ThrowItMirai
 import java.awt.AlphaComposite
-import java.awt.Graphics2D
 import java.awt.RenderingHints
 import java.awt.geom.Ellipse2D
 import java.awt.image.BufferedImage
@@ -22,9 +21,12 @@ object ThrowItCommand : SimpleCommand(
     ThrowItMirai, "丢", "throw",
     description = "把群友丢出去"
 ) {
+    @JvmStatic
+    private val bgImg = ImageIO.read(ThrowItCommand::class.java.classLoader.getResource("template.png"))
+
     @Handler
     @Suppress("unused")
-    suspend fun CommandSender.handle(target: User) {
+    suspend fun CommandSender.handle(target: Contact) {
         if(user==null){
             throw RuntimeException("请在聊天环境使用此命令")
         }
@@ -32,14 +34,14 @@ object ThrowItCommand : SimpleCommand(
         lateinit var os : ByteArrayOutputStream
         try {
             // 从AvatarURL读入头像图片
-            val image: BufferedImage = ImageIO.read(URL(target.avatarUrl))
+            val image = ImageIO.read(URL(target.avatarUrl))
             // 设置图层参数
             val avaImg = BufferedImage(image.width, image.height, BufferedImage.TYPE_4BYTE_ABGR)
             // 开启抗锯齿
             val renderingHints = RenderingHints(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
             // 绘制蒙版
-            val shape: Ellipse2D = Ellipse2D.Double(.0, .0, image.width.toDouble(), image.height.toDouble())
-            val avaImgGraphics: Graphics2D = avaImg.createGraphics()
+            val shape = Ellipse2D.Double(.0, .0, image.width.toDouble(), image.height.toDouble())
+            val avaImgGraphics = avaImg.createGraphics()
             // 绘制开始
             avaImgGraphics.setRenderingHints(renderingHints)
             avaImgGraphics.clip = shape
@@ -47,7 +49,7 @@ object ThrowItCommand : SimpleCommand(
             avaImgGraphics.dispose()
             // 绘制结束
             // 旋转图片
-            var proceedAva: BufferedImage = Thumbnails.of(avaImg)
+            var proceedAva = Thumbnails.of(avaImg)
                 .size(136, 136)
                 .rotate(-160.0)
                 .asBufferedImage()
@@ -57,9 +59,7 @@ object ThrowItCommand : SimpleCommand(
                 .size(136, 136)
                 .keepAspectRatio(false)
                 .asBufferedImage()
-            // 读取背景图并绘制图片
-            val bgImg: BufferedImage = ImageIO.read(ThrowItCommand::class.java.classLoader.getResource("template.png"))
-            val bgImgGraphics: Graphics2D = bgImg.createGraphics()
+            val bgImgGraphics = bgImg.createGraphics()
             bgImgGraphics.composite = AlphaComposite.getInstance(AlphaComposite.SRC_ATOP)
             bgImgGraphics.drawImage(proceedAva, 19, 181, 137, 137, null)
             // 结束绘制图片

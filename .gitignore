@@ -119,3 +119,7 @@ run/
 
 # Local Test Launch point
 src/test/kotlin/RunTerminal.kt
+/gradlew
+/gradlew.bat
+/gradle/wrapper/gradle-wrapper.jar
+/gradle/wrapper/gradle-wrapper.properties
