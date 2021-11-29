@@ -4,6 +4,8 @@ import net.coobird.thumbnailator.Thumbnails
 import net.coobird.thumbnailator.geometry.Positions
 import net.mamoe.mirai.console.command.CommandSender
 import net.mamoe.mirai.console.command.SimpleCommand
+import net.mamoe.mirai.console.command.descriptor.ExperimentalCommandDescriptors
+import net.mamoe.mirai.console.util.ConsoleExperimentalApi
 import net.mamoe.mirai.contact.Contact
 import net.mamoe.mirai.utils.ExternalResource
 import net.mamoe.mirai.utils.ExternalResource.Companion.toExternalResource
@@ -17,10 +19,15 @@ import java.io.*
 import java.net.URL
 import javax.imageio.ImageIO
 
+@ConsoleExperimentalApi
+@ExperimentalCommandDescriptors
 object ThrowItCommand : SimpleCommand(
     ThrowItMirai, "丢", "throw",
     description = "把群友丢出去"
 ) {
+
+    override val prefixOptional: Boolean = true // 命令可不通过添加前缀'/'使用
+
     @JvmStatic
     private val bgImg = ImageIO.read(ThrowItCommand::class.java.classLoader.getResource("template.png"))
 
