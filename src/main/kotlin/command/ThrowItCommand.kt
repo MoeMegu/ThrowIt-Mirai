@@ -7,6 +7,8 @@ import net.mamoe.mirai.console.command.SimpleCommand
 import net.mamoe.mirai.console.command.descriptor.ExperimentalCommandDescriptors
 import net.mamoe.mirai.console.util.ConsoleExperimentalApi
 import net.mamoe.mirai.contact.Contact
+import net.mamoe.mirai.message.data.Image
+import net.mamoe.mirai.message.data.Image.Key.isUploaded
 import net.mamoe.mirai.utils.ExternalResource
 import net.mamoe.mirai.utils.ExternalResource.Companion.toExternalResource
 import net.mamoe.mirai.utils.ExternalResource.Companion.uploadAsImage
@@ -39,6 +41,7 @@ object ThrowItCommand : SimpleCommand(
         }
         lateinit var result : ExternalResource
         lateinit var os : ByteArrayOutputStream
+        lateinit var imageMessage : Image
         try {
             // 从AvatarURL读入头像图片
             val image = ImageIO.read(URL(target.avatarUrl))
@@ -84,7 +87,10 @@ object ThrowItCommand : SimpleCommand(
             ThrowItMirai.logger.error(e)
             sendMessage("Throw-It图片绘制失败")
         }
-        val uploadAsImage = result.uploadAsImage(subject!!)
-        subject!!.sendMessage(uploadAsImage)
+        var failedTry = 0
+        do imageMessage = result.uploadAsImage(subject!!) while (
+            !imageMessage.isUploaded(bot!!) || failedTry++ <= 3
+        )
+        subject!!.sendMessage(imageMessage)
     }
 }
