@@ -91,6 +91,7 @@ object ThrowItCommand : SimpleCommand(
         do imageMessage = result.uploadAsImage(subject!!) while (
             !imageMessage.isUploaded(bot!!) || failedTry++ <= 3
         )
+        if (!imageMessage.isUploaded(bot!!)) throw RuntimeException("图片上传失败")
         subject!!.sendMessage(imageMessage)
     }
 }
