@@ -2,11 +2,13 @@ package pers.moe.command
 
 import net.coobird.thumbnailator.Thumbnails
 import net.coobird.thumbnailator.geometry.Positions
+import net.mamoe.mirai.console.MiraiConsole
 import net.mamoe.mirai.console.command.CommandSender
 import net.mamoe.mirai.console.command.SimpleCommand
 import net.mamoe.mirai.console.command.descriptor.ExperimentalCommandDescriptors
 import net.mamoe.mirai.console.util.ConsoleExperimentalApi
-import net.mamoe.mirai.contact.Contact
+import net.mamoe.mirai.console.util.SemVersion.Companion.satisfies
+import net.mamoe.mirai.contact.User
 import net.mamoe.mirai.message.data.Image
 import net.mamoe.mirai.message.data.Image.Key.isUploaded
 import net.mamoe.mirai.utils.ExternalResource
@@ -17,7 +19,8 @@ import java.awt.AlphaComposite
 import java.awt.RenderingHints
 import java.awt.geom.Ellipse2D
 import java.awt.image.BufferedImage
-import java.io.*
+import java.io.ByteArrayOutputStream
+import java.io.IOException
 import java.net.URL
 import javax.imageio.ImageIO
 
@@ -35,13 +38,11 @@ object ThrowItCommand : SimpleCommand(
 
     @Handler
     @Suppress("unused")
-    suspend fun CommandSender.handle(target: Contact) {
-        if(user==null){
-            throw RuntimeException("请在聊天环境使用此命令")
-        }
-        lateinit var result : ExternalResource
-        lateinit var os : ByteArrayOutputStream
-        lateinit var imageMessage : Image
+    suspend fun CommandSender.handle(target: User) {
+        user ?: throw RuntimeException("请在聊天环境使用此命令")
+        lateinit var result: ExternalResource
+        lateinit var os: ByteArrayOutputStream
+        lateinit var imageMessage: Image
         try {
             // 从AvatarURL读入头像图片
             val image = ImageIO.read(URL(target.avatarUrl))
@@ -87,11 +88,16 @@ object ThrowItCommand : SimpleCommand(
             ThrowItMirai.logger.error(e)
             sendMessage("Throw-It图片绘制失败")
         }
-        var failedTry = 0
-        do imageMessage = result.uploadAsImage(subject!!) while (
-            !imageMessage.isUploaded(bot!!) || failedTry++ <= 3
-        )
-        if (!imageMessage.isUploaded(bot!!)) throw RuntimeException("图片上传失败")
-        subject!!.sendMessage(imageMessage)
+        try {
+            var failedTry = 0
+            do imageMessage = result.uploadAsImage(subject!!) while (
+                MiraiConsole.version.satisfies(">=2.9.0") && !imageMessage.isUploaded(bot!!) && failedTry++ <= 3
+            )
+            if (failedTry == 3) throw RuntimeException()
+            subject!!.sendMessage(imageMessage)
+        } catch (e: RuntimeException) {
+            ThrowItMirai.logger.error(e)
+            ThrowItMirai.logger.error("图片上传失败, 请检查网络")
+        }
     }
 }
