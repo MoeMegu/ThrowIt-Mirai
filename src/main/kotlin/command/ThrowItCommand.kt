@@ -2,10 +2,12 @@ package pers.moe.command
 
 import net.coobird.thumbnailator.Thumbnails
 import net.coobird.thumbnailator.geometry.Positions
+import net.mamoe.mirai.console.MiraiConsole
 import net.mamoe.mirai.console.command.CommandSender
 import net.mamoe.mirai.console.command.SimpleCommand
 import net.mamoe.mirai.console.command.descriptor.ExperimentalCommandDescriptors
 import net.mamoe.mirai.console.util.ConsoleExperimentalApi
+import net.mamoe.mirai.console.util.SemVersion.Companion.satisfies
 import net.mamoe.mirai.contact.Contact
 import net.mamoe.mirai.message.data.Image
 import net.mamoe.mirai.message.data.Image.Key.isUploaded
@@ -89,7 +91,7 @@ object ThrowItCommand : SimpleCommand(
         }
         var failedTry = 0
         do imageMessage = result.uploadAsImage(subject!!) while (
-            !imageMessage.isUploaded(bot!!) || failedTry++ <= 3
+            MiraiConsole.version.satisfies(">=2.9.0-M1") || !imageMessage.isUploaded(bot!!) || failedTry++ <= 3
         )
         if (!imageMessage.isUploaded(bot!!)) throw RuntimeException("图片上传失败")
         subject!!.sendMessage(imageMessage)
