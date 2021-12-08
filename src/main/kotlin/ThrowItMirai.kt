@@ -26,7 +26,7 @@ object ThrowItMirai : KotlinPlugin(
         CommandManager.registerCommand(ThrowItCommand)
         if (!MiraiConsole.version.satisfies(">=2.9.0-M1")) logger.warning("\n*****ThrowIt-Mirai*****" +
                 "\n您的Mirai-Console版本低于 2.9.0-M1 图片上传检查功能将不会工作" +
-                "\n***********************\n")
+                "\n***********************")
         logger.info { "Plugin loaded" }
     }
 }
