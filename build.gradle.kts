@@ -3,7 +3,7 @@ plugins {
     kotlin("jvm") version kotlinVersion
     kotlin("plugin.serialization") version kotlinVersion
 
-    id("net.mamoe.mirai-console") version "2.9.0-M1"
+    id("net.mamoe.mirai-console") version "2.9.2"
 }
 
 group = "pers.moe"
@@ -14,5 +14,5 @@ repositories {
     mavenCentral()
 }
 dependencies {
-    implementation("net.coobird:thumbnailator:0.4.14")
+    implementation("net.coobird:thumbnailator:0.4.15")
 }
