@@ -8,7 +8,6 @@ import net.mamoe.mirai.console.command.SimpleCommand
 import net.mamoe.mirai.console.command.descriptor.ExperimentalCommandDescriptors
 import net.mamoe.mirai.console.util.ConsoleExperimentalApi
 import net.mamoe.mirai.console.util.SemVersion.Companion.satisfies
-import net.mamoe.mirai.contact.User
 import net.mamoe.mirai.message.data.Image
 import net.mamoe.mirai.message.data.Image.Key.isUploaded
 import net.mamoe.mirai.utils.ExternalResource
@@ -36,16 +35,29 @@ object ThrowItCommand : SimpleCommand(
     @JvmStatic
     private val bgImg = ImageIO.read(ThrowItCommand::class.java.classLoader.getResource("template.png"))
 
+    private val avaQuality = "5"
     @Handler
     @Suppress("unused")
-    suspend fun CommandSender.handle(target: User) {
-        user ?: throw RuntimeException("请在聊天环境使用此命令")
+    suspend fun CommandSender.handle(target: String) {
+        subject ?: throw RuntimeException("请在聊天环境使用此命令")
+        // TODO 目标解析器部分
+        val targetQQ: Int? = when {
+            // 匹配QQ号
+            target.matches("[1-9][0-9]{4,}+".toRegex()) -> target.toInt()
+            // 匹配Mirai code的at信息
+            target.matches("^(\\[mirai:at:)+[1-9][0-9]{4,}]".toRegex()) -> target.substring(10, -1).toInt()
+            // TODO 匹配复读/纯文本at信息
+            target.matches("^@+[1-9][0-9]{4,}".toRegex()) -> target.substring(1, target.length).toInt()
+            else -> null
+        }
+        targetQQ ?: subject!!.sendMessage("throw指令参数有误")
+
         lateinit var result: ExternalResource
         lateinit var os: ByteArrayOutputStream
         lateinit var imageMessage: Image
         try {
             // 从AvatarURL读入头像图片
-            val image = ImageIO.read(URL(target.avatarUrl))
+            val image = ImageIO.read(URL("https://q1.qlogo.cn/g?b=qq&nk=$targetQQ&s=$avaQuality"))
             // 设置图层参数
             val avaImg = BufferedImage(image.width, image.height, BufferedImage.TYPE_4BYTE_ABGR)
             // 开启抗锯齿
