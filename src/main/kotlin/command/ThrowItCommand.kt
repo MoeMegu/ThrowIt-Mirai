@@ -10,15 +10,10 @@ import net.mamoe.mirai.console.util.ConsoleExperimentalApi
 import net.mamoe.mirai.console.util.SemVersion.Companion.satisfies
 import net.mamoe.mirai.contact.BotIsBeingMutedException
 import net.mamoe.mirai.contact.Contact
-import net.mamoe.mirai.contact.User
 import net.mamoe.mirai.message.data.Image
 import net.mamoe.mirai.message.data.Image.Key.isUploaded
-import net.mamoe.mirai.message.data.Image.Key.queryUrl
-import net.mamoe.mirai.message.data.PlainText
-import net.mamoe.mirai.message.data.sendTo
 import net.mamoe.mirai.utils.ExternalResource
 import net.mamoe.mirai.utils.ExternalResource.Companion.toExternalResource
-import net.mamoe.mirai.utils.ExternalResource.Companion.uploadAsImage
 import pers.moe.ThrowItMirai
 import java.awt.AlphaComposite
 import java.awt.RenderingHints
@@ -41,11 +36,9 @@ object ThrowItCommand : SimpleCommand(
     @JvmStatic
     private val bgImg = ImageIO.read(ThrowItCommand::class.java.classLoader.getResource("template.png"))
 
-    private val avaQuality = "5"
-
     @Handler
     @Suppress("unused")
-    suspend fun CommandSender.handle(target: User) {
+    suspend fun CommandSender.handle(target: Contact) {
         subject ?: throw RuntimeException("请在聊天环境使用此命令")
         lateinit var result: ExternalResource
         try {
@@ -61,34 +54,6 @@ object ThrowItCommand : SimpleCommand(
         }
     }
 
-//    @Handler
-//    @Suppress("unused")
-//    suspend fun CommandSender.handle(image: Image) {
-//        lateinit var bufferedImage: BufferedImage
-//        lateinit var result: ExternalResource
-//        try {
-//            bufferedImage = ImageIO.read(URL(image.queryUrl()))
-//        } catch (e: IOException) {
-//            ThrowItMirai.logger.error(e)
-//            ThrowItMirai.logger.error("图片下载失败,请检查网络")
-//        }
-//        try {
-//            result = throwIt(bufferedImage)
-//            result.use { it.close() }
-//        } catch (e: IOException) {
-//            ThrowItMirai.logger.error(e)
-//            ThrowItMirai.logger.error("图片绘制失败")
-//        }
-//        sendResult(result)
-//
-//    }
-
-//    @Handler
-//    @Suppress("unused")
-//    suspend fun CommandSender.handle(target: PlainText) {
-//        ThrowItMirai.logger.info(target.contentToString())
-//        TODO("纯文本解析")
-//    }
     /**
      * 通过传入图片绘制ThrowIt
      *
@@ -132,7 +97,7 @@ object ThrowItCommand : SimpleCommand(
         val bufferedImage = Thumbnails.of(bgImg)
             .size(512, 512)
             .asBufferedImage()
-        val os: ByteArrayOutputStream = ByteArrayOutputStream()
+        val os = ByteArrayOutputStream()
         os.use { it.close() }
         ImageIO.write(bufferedImage, "png", os)
         val result: ExternalResource = os.toByteArray().toExternalResource()
