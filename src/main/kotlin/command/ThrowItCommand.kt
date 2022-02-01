@@ -48,11 +48,10 @@ object ThrowItCommand : SimpleCommand(
     suspend fun CommandSender.handle(target: User) {
         subject ?: throw RuntimeException("请在聊天环境使用此命令")
         lateinit var result: ExternalResource
-        lateinit var imageMessage: Image
         try {
             result = throwIt(ImageIO.read(URL(target.avatarUrl)))
             result.use { it.close() }
-            imageMessage = sendResult(result, subject!!)
+            sendResult(result)
         } catch (e: IOException) {
             ThrowItMirai.logger.error(e)
             ThrowItMirai.logger.error("图片绘制失败")
@@ -60,37 +59,36 @@ object ThrowItCommand : SimpleCommand(
             ThrowItMirai.logger.error(e)
             ThrowItMirai.logger.error("图片上传失败")
         }
-        TODO("用户调用")
     }
 
-    @Handler
-    @Suppress("unused")
-    suspend fun CommandSender.handle(image: Image) {
-        lateinit var bufferedImage: BufferedImage
-        lateinit var result: ExternalResource
-        try {
-            bufferedImage = ImageIO.read(URL(image.queryUrl()))
-        } catch (e: IOException) {
-            ThrowItMirai.logger.error(e)
-            ThrowItMirai.logger.error("图片下载失败,请检查网络")
-        }
-        try {
-            result = throwIt(bufferedImage)
-            result.use { it.close() }
-        } catch (e: IOException) {
-            ThrowItMirai.logger.error(e)
-            ThrowItMirai.logger.error("图片绘制失败")
-        }
-        sendResult(result)
+//    @Handler
+//    @Suppress("unused")
+//    suspend fun CommandSender.handle(image: Image) {
+//        lateinit var bufferedImage: BufferedImage
+//        lateinit var result: ExternalResource
+//        try {
+//            bufferedImage = ImageIO.read(URL(image.queryUrl()))
+//        } catch (e: IOException) {
+//            ThrowItMirai.logger.error(e)
+//            ThrowItMirai.logger.error("图片下载失败,请检查网络")
+//        }
+//        try {
+//            result = throwIt(bufferedImage)
+//            result.use { it.close() }
+//        } catch (e: IOException) {
+//            ThrowItMirai.logger.error(e)
+//            ThrowItMirai.logger.error("图片绘制失败")
+//        }
+//        sendResult(result)
+//
+//    }
 
-    }
-
-    @Handler
-    @Suppress("unused")
-    suspend fun CommandSender.handle(target: PlainText) {
-        TODO("纯文本解析")
-
-    }
+//    @Handler
+//    @Suppress("unused")
+//    suspend fun CommandSender.handle(target: PlainText) {
+//        ThrowItMirai.logger.info(target.contentToString())
+//        TODO("纯文本解析")
+//    }
     /**
      * 通过传入图片绘制ThrowIt
      *
